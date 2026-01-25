@@ -1,0 +1,294 @@
+/* =========================================
+   1. 전역 설정 및 초기화 (모바일 최적화)
+   ========================================= */
+   * {
+    box-sizing: border-box;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    margin: 0; padding: 0;
+  }
+  
+  body, html {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background-color: #000;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  
+  .app-container {
+    width: 100vw; height: 100vh;
+    background: #000 url('https://www.transparenttextures.com/patterns/stardust.png');
+    color: white;
+    display: flex; flex-direction: column;
+  }
+  
+  /* =========================================
+     2. 메인 로비 & 타이틀
+     ========================================= */
+  .main-title-screen {
+    flex: 1;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 20px;
+  }
+  
+  .glitch-title {
+    font-size: clamp(2.5rem, 12vw, 5rem);
+    font-weight: 900;
+    color: #00f3ff;
+    text-shadow: 0 0 20px rgba(0, 243, 255, 0.7);
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  
+  .global-gold {
+    margin-top: 20px;
+    font-size: 1.2rem;
+    color: #ffd700;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  }
+  
+  .lobby-buttons {
+    display: flex; flex-direction: column;
+    gap: 15px; width: 250px;
+  }
+  
+  .btn-start, .btn-shop {
+    padding: 18px; font-size: 1.2rem; font-weight: bold;
+    border-radius: 50px; border: none; cursor: pointer; transition: 0.2s;
+  }
+  
+  .btn-start { background: #00f3ff; color: #000; }
+  .btn-shop { background: #1a1a1a; color: #fff; border: 2px solid #00f3ff; }
+  .btn-start:active, .btn-shop:active { transform: scale(0.95); }
+  
+  /* =========================================
+     3. 게임 스테이지 & HUD
+     ========================================= */
+  .stage-container { width: 100%; height: 100%; position: relative; }
+  
+  .stage-hud {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 20px; background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px); border-bottom: 1px solid rgba(0, 243, 255, 0.3);
+    z-index: 100;
+  }
+  
+  .timer-box { color: #ff4e4e; font-weight: bold; font-size: 1.2rem; }
+  .gold-box { color: #ffd700; font-weight: bold; font-size: 1.2rem; }
+  
+  .stop-btn {
+    background: #ff4e4e; border: none; color: white;
+    padding: 8px 16px; border-radius: 8px; font-weight: bold;
+  }
+  
+  .space-canvas {
+    position: relative; width: 100%;
+    height: calc(100% - 60px);
+  }
+  
+  /* 움직이는 광물 */
+  .moving-ore {
+    position: absolute; width: 75px; height: 75px;
+    border-radius: 18px; display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    cursor: pointer; transition: transform 0.05s, filter 0.05s;
+    z-index: 10;
+  }
+  
+  .moving-ore:active { transform: scale(0.85); filter: brightness(1.5); }
+  
+  .ore-hp-bar {
+    width: 80%; height: 6px; background: #333;
+    border-radius: 3px; overflow: hidden; margin-bottom: 6px;
+  }
+  
+  .hp-fill { height: 100%; background: #50fa7b; transition: width 0.1s ease-out; }
+  
+  .ore-label {
+    font-size: 11px; color: #fff; font-weight: bold;
+    text-shadow: 1px 1px 2px #000; text-align: center;
+  }
+  
+  /* =========================================
+     4. 공통 오버레이 & 카드 UI (연구소/결과창)
+     ========================================= */
+  .overlay-screen {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 2000; backdrop-filter: blur(10px);
+  }
+  
+  /* 연구소 카드 */
+  .shop-card {
+    background: #0f172a; border: 1px solid #00f3ff;
+    width: 90%; max-width: 450px; padding: 25px;
+    border-radius: 20px; position: relative;
+  }
+  
+  .shop-title { color: #00f3ff; margin-bottom: 15px; text-align: center; font-size: 1.5rem; }
+  
+  .current-funds {
+    background: rgba(0, 243, 255, 0.1); padding: 12px;
+    border-radius: 10px; margin-bottom: 20px; text-align: center;
+  }
+  .current-funds span { color: #ffd700; font-weight: bold; }
+  
+  .close-x {
+    position: absolute; top: 15px; right: 15px;
+    background: #1e293b; border: 1px solid #00f3ff;
+    color: white; width: 30px; height: 30px;
+    border-radius: 50%; cursor: pointer;
+  }
+  
+  /* 스킬 아이템 리스트 */
+  .skill-list { display: flex; flex-direction: column; gap: 12px; }
+  
+  .skill-card {
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(255, 255, 255, 0.05); padding: 12px;
+    border-radius: 12px; border-left: 4px solid #00f3ff;
+  }
+  
+  .skill-info { display: flex; flex-direction: column; gap: 4px; text-align: left; }
+  .skill-name { font-weight: bold; font-size: 0.95rem; }
+  .skill-desc { font-size: 0.75rem; color: #94a3b8; }
+  
+  .buy-btn {
+    background: #00f3ff; color: #000; border: none;
+    padding: 10px 12px; border-radius: 8px;
+    font-weight: bold; min-width: 85px; cursor: pointer;
+  }
+  
+  .buy-btn.disabled { background: #334155; color: #64748b; cursor: not-allowed; }
+  
+  /* 광물 해금 구역 */
+  .unlock-card {
+    margin-top: 10px; padding: 15px;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border: 1px dashed #ffd700; border-radius: 12px; text-align: center;
+  }
+  
+  .unlock-main-btn {
+    width: 100%; padding: 15px; background: #ffd700;
+    color: #000; border: none; border-radius: 10px;
+    font-weight: 900; margin-top: 10px; cursor: pointer;
+  }
+  
+  .unlock-main-btn.disabled { opacity: 0.5; cursor: not-allowed; }
+  
+  /* =========================================
+     5. 결과창 전용
+     ========================================= */
+  .result-card {
+    background: #1a1b26; padding: 30px;
+    border-radius: 20px; border: 2px solid #ffd700;
+    text-align: center; min-width: 300px;
+  }
+  
+  .earned-gold {
+    font-size: 2.8rem; color: #ffd700; display: block;
+    margin: 20px 0; text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+  }
+  
+  .confirm-btn {
+    width: 100%; padding: 16px; background: #ffd700;
+    color: #000; border: none; border-radius: 12px;
+    font-weight: 900; font-size: 1.2rem; cursor: pointer;
+  }
+  
+  /* =========================================
+     6. 기타 효과 & 애니메이션
+     ========================================= */
+  .shadow-animation { animation: glow 2s infinite alternate; }
+  
+  @keyframes glow {
+    from { box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); }
+    to { box-shadow: 0 0 35px rgba(255, 215, 0, 0.5); }
+  }
+  
+  @media (max-width: 600px) {
+    .moving-ore { width: 65px; height: 65px; }
+    .lobby-buttons { width: 80%; }
+    .glitch-title { margin-bottom: 40px; }
+  }
+  /* 미사일(크리티컬) 전용 효과 */
+
+  
+.critical-hit {
+  animation: shake 0.2s infinite;
+  border: 4px solid #ff0000 !important;
+  box-shadow: 0 0 30px #ff4e4e !important;
+}
+
+/* Ore가 미사일을 맞았을 때의 효과 클래스 (Ore.jsx에서 사용) */
+.missile-effect {
+  animation: missile-shake 0.3s ease-in-out;
+  border: 3px solid #ff4e4e !important;
+  filter: saturate(2) brightness(1.5);
+}
+
+@keyframes missile-shake {
+  0% { transform: translate(0, 0) scale(1.1); }
+  25% { transform: translate(-5px, 5px); }
+  50% { transform: translate(5px, -5px); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+/* 연구소 내 미사일 스킬 포인트 컬러 */
+.skill-card:nth-child(3) {
+  border-left: 4px solid #ff4e4e;
+}
+
+/* 크리티컬 텍스트 이펙트 */
+.crit-effect {
+  position: fixed;
+  pointer-events: none;
+  color: #ff3e3e;
+  font-weight: 900;
+  font-size: 1.5rem;
+  text-shadow: 0 0 10px #fff, 0 0 20px #ff0000;
+  animation: crit-float 0.8s ease-out forwards;
+  z-index: 9999;
+}
+
+@keyframes crit-float {
+  0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+  30% { transform: translate(-50%, -100%) scale(1.5); opacity: 1; }
+  100% { transform: translate(-50%, -200%) scale(1.2); opacity: 0; }
+}
+
+/* 광물 SVG 스타일 */
+.ore-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 5px 15px rgba(0,0,0,0.8));
+}
+
+.moving-ore {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s;
+  pointer-events: none; /* 클릭은 부모 canvas에서 좌표로 판정 */
+}
+
+/* 채굴 중인 광물 살짝 떨림 효과 */
+.moving-ore:hover {
+  transform: scale(1.1);
+}
+
+.ore-hp-bar {
+  width: 100%;
+  height: 4px;
+  background: #222;
+  position: absolute;
+  bottom: -5px;
+  border-radius: 2px;
+}
