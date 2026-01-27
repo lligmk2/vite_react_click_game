@@ -29,14 +29,14 @@ export const SKILL_INFO = {
   radius: { name: "채굴 범위", maxLevel: 10, baseCost: 300, desc: "한 번에 채굴할 수 있는 범위가 넓어집니다." },
   regen: { name: "탐지 센서", maxLevel: 10, baseCost: 500, desc: "화면에 동시에 등장하는 광물의 개수가 늘어납니다." },
   missile: { name: "멀티 록온", maxLevel: 3, baseCost: 5000, desc: "채굴 시 화면 내 다른 광물들도 동시에 타격합니다." },
-  critical: { name: "정밀 타격", maxLevel: 10, baseCost: 500, desc: "크리티컬 확률(최대 50%)과 배율이 증가합니다." },
+  critical: { name: "정밀 타격", maxLevel: 10, baseCost: 3000, desc: "크리티컬 확률(최대 50%)과 배율이 증가합니다." },
   duration: { name: "시간 연장", maxLevel: 5, baseCost: 1000, desc: "제한 시간이 5초씩 늘어납니다." } // 시간 연장 스킬도 유지
 };
 
 export const INITIAL_SKILLS = {
   power: 1,
   autoClick: 0,   // 0: 드래그 불가 (잠금 상태)
-  radius: 1,      // 0: 점 타격
+  radius: 0,      // 0: 점 타격
   regen: 0,       // 0: 기본 개수
   missile: 0,     // 0: 없음
   critical: 0,
