@@ -36,7 +36,7 @@ export const SKILL_INFO = {
 export const INITIAL_SKILLS = {
   power: 1,
   autoClick: 0,   // 0: 드래그 불가 (잠금 상태)
-  radius: 0,      // 0: 점 타격
+  radius: 1,      // 0: 점 타격
   regen: 0,       // 0: 기본 개수
   missile: 0,     // 0: 없음
   critical: 0,

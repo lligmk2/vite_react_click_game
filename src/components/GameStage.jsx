@@ -202,11 +202,11 @@ export default function GameStage({ skills, currentOreIndex, onTimeUp }) {
         }
       });
       
-      const maxOres = 5 + (skills.regen * 2);
+      const maxOres = 15 + (skills.regen * 2);
       const needed = maxOres - oresRef.current.length;
       if (needed > 0) spawnOres(needed);
 
-      playSound('break');
+      playSound('click');
     }
     
     if (hitCount > 0) playSound(isClick ? 'mine' : 'click');
