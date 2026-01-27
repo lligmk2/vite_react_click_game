@@ -3,7 +3,6 @@ import { ORES } from '../constants';
 import { playSound } from '../utils/SoundManager'; 
 
 export default function GameStage({ skills, currentOreIndex, onTimeUp }) {
-  // [수정] 기본 시간 15초 + 업그레이드당 5초 (요청사항 반영)
   const [timeLeft, setTimeLeft] = useState(15 + ((skills.duration || 0) * 5));
   const [score, setScore] = useState(0);
   const [damageTexts, setDamageTexts] = useState([]); 
@@ -16,9 +15,7 @@ export default function GameStage({ skills, currentOreIndex, onTimeUp }) {
   const lastAutoMineTime = useRef(0); 
   const scoreRef = useRef(0); 
 
-  // 초기화
   useEffect(() => {
-    // 초기 스폰 (기본 5개 + 리젠스킬*2)
     const initialCount = 15 + (skills.regen * 2);
     spawnOres(initialCount);
 
@@ -68,29 +65,37 @@ export default function GameStage({ skills, currentOreIndex, onTimeUp }) {
       }
 
       const id = Date.now() + Math.random();
-      const div = document.createElement('div');
-      div.id = `ore-${id}`;
-      div.className = 'ore-instance-dynamic';
-      div.style.backgroundColor = selected.color;
-      div.style.clipPath = selected.shape || 'circle(50%)';
-      div.style.width = '60px';
-      div.style.height = '60px';
       
-      // HP바
+      // 1. 컨테이너 (이동 담당, 모양 없음)
+      const container = document.createElement('div');
+      container.id = `ore-${id}`;
+      container.className = 'ore-container-dynamic'; // 클래스명 변경
+      container.style.width = '60px';
+      container.style.height = '60px';
+
+      // 2. 비주얼 (모양 및 색상 담당, 여기에 clip-path 적용)
+      const visual = document.createElement('div');
+      visual.className = 'ore-visual';
+      visual.style.backgroundColor = selected.color;
+      visual.style.clipPath = selected.shape || 'circle(50%)';
+      container.appendChild(visual);
+      
+      // 3. HP바 (컨테이너 내부에 있지만 visual 밖, 절대 위치)
       const hpBg = document.createElement('div');
       hpBg.className = 'ore-hp-bg';
       const hpFill = document.createElement('div');
       hpFill.className = 'ore-hp-fill';
       hpFill.id = `hp-${id}`;
       hpBg.appendChild(hpFill);
-      div.appendChild(hpBg);
+      container.appendChild(hpBg);
 
-      containerRef.current.appendChild(div);
+      containerRef.current.appendChild(container);
 
       oresRef.current.push({
         id, 
-        element: div, 
-        hpElement: hpFill,
+        element: container,   // 이동용
+        visualElement: visual,// 피격 효과용
+        hpElement: hpFill,    // 체력바용
         ...selected,
         x: Math.random() * (w - 60),
         y: Math.random() * (h - 60),
@@ -117,24 +122,25 @@ export default function GameStage({ skills, currentOreIndex, onTimeUp }) {
       ore.x = Math.max(0, Math.min(ore.x, w - 60));
       ore.y = Math.max(0, Math.min(ore.y, h - 60));
 
+      // 이동 업데이트 (컨테이너)
       if (ore.element) {
-        const scale = ore.hitTime > 0 ? ore.scale * 1.2 : ore.scale;
+        // 스케일은 전체에 적용 (커지면 HP바도 같이 커짐)
+        const scale = ore.hitTime > 0 ? ore.scale * 1.1 : ore.scale;
         ore.element.style.transform = `translate(${ore.x}px, ${ore.y}px) scale(${scale})`;
-        
+      }
+
+      // 피격 효과 업데이트 (비주얼만 깜빡임)
+      if (ore.visualElement) {
         if (ore.hitTime > 0) {
-          ore.element.style.filter = 'brightness(2)';
+          ore.visualElement.style.filter = 'brightness(2) sepia(1)'; // 반짝임 강화
           ore.hitTime--;
         } else {
-          ore.element.style.filter = 'none';
+          ore.visualElement.style.filter = 'none';
         }
       }
     });
 
-    // [핵심] 오토 드릴 로직
-    // skills.autoClick이 0이면 작동 안함 (1회성 구매 전)
-    // skills.autoClick이 1 이상이면 작동 (구매 후)
     if (pointerRef.current.isDown && skills.autoClick > 0) {
-      // 속도 공식: Lv1=600ms(느림) ~ Lv10=60ms(빠름)
       const cooldown = Math.max(60, 600 - (skills.autoClick * 60));
       if (time - lastAutoMineTime.current > cooldown) {
         checkCollision(pointerRef.current.x, pointerRef.current.y, false); 
@@ -152,13 +158,13 @@ export default function GameStage({ skills, currentOreIndex, onTimeUp }) {
     requestRef.current = requestAnimationFrame(gameLoop);
   };
 
-const checkCollision = (globalX, globalY, isClick) => {
+  const checkCollision = (globalX, globalY, isClick) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     const localX = globalX - rect.left;
     const localY = globalY - rect.top;
 
-    const radius = 5 + (skills.radius * 20);
+    const radius = 15 + (skills.radius * 20);
     let hitCount = 0;
     const deadIndices = [];
 
@@ -198,14 +204,13 @@ const checkCollision = (globalX, globalY, isClick) => {
         }
       });
       
-      const maxOres = 15 + (skills.regen * 2);
+      const maxOres = 15 + (skills.regen * 2); 
       const needed = maxOres - oresRef.current.length;
       if (needed > 0) spawnOres(needed);
 
       playSound('break');
     }
     
-    // [중요 수정] 드래그든 클릭이든 맞추면 무조건 'mine' 사운드 재생
     if (hitCount > 0) {
         playSound('mine'); 
     }
@@ -221,10 +226,12 @@ const checkCollision = (globalX, globalY, isClick) => {
     ore.currentHp -= dmg;
     ore.hitTime = 10; 
 
+    // HP바 업데이트
     if (ore.hpElement) {
       const pct = Math.max(0, (ore.currentHp / ore.maxHp) * 100);
       ore.hpElement.style.width = `${pct}%`;
-      ore.hpElement.style.backgroundColor = pct < 30 ? 'red' : '#00f3ff';
+      // 색상 변경: 30% 미만 빨강, 그 외 형광파랑
+      ore.hpElement.style.backgroundColor = pct < 30 ? '#ff3e3e' : '#00f3ff';
     }
 
     showDamageText(ore.x, ore.y, dmg, isCrit);
@@ -245,21 +252,18 @@ const checkCollision = (globalX, globalY, isClick) => {
     if(isCrit) playSound('critical');
   };
 
-  // 입력 핸들러
   const handleDown = (e) => {
     pointerRef.current = { x: e.clientX, y: e.clientY, isDown: true };
-    // 다운 시엔 무조건 1회 타격 (스킬 여부 상관 없음 - 기본 기능)
     checkCollision(e.clientX, e.clientY, true);
   };
   
   const handleMove = (e) => {
     pointerRef.current = { x: e.clientX, y: e.clientY, isDown: pointerRef.current.isDown };
-    // Move 시엔 gameLoop 안에서 autoClick 레벨 체크 후 자동 채굴
   };
 
   const handleUp = () => pointerRef.current.isDown = false;
 
-  const scannerSize = (15 + skills.radius * 20) * 2; // 범위 시각화도 수정
+  const scannerSize = (15 + skills.radius * 20) * 2; 
 
   return (
     <div 

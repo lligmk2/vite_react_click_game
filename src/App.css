@@ -167,59 +167,76 @@
     pointer-events: none; z-index: 90;
   }
 
-  /* [추가/변경] 채굴 범위 스캐너 (마우스 따라다니는 원) */
+ /* [수정됨] 채굴 범위 스캐너 스타일 */
 .mining-scanner {
+  /* 위치 이동(Translate)은 JS가 담당하므로 여기선 껍데기만 설정 */
   position: absolute;
   top: 0; left: 0;
-  border: 1px dashed rgba(0, 243, 255, 0.4); /* 은은한 점선 테두리 */
-  background: radial-gradient(circle, rgba(0, 243, 255, 0.1) 0%, transparent 70%); /* 내부는 투명하게 */
-  border-radius: 50%;
-  pointer-events: none; /* 클릭 통과 (게임 방해 X) */
-  z-index: 5; /* 광물(z-index: 10)보다 아래에 그려져서 광물을 가리지 않음 */
-  will-change: transform; /* 성능 최적화 */
-  box-shadow: 0 0 10px rgba(0, 243, 255, 0.1); /* 약한 발광 효과 */
-  display: none; /* 기본 숨김, JS로 제어 */
+  z-index: 5;
+  pointer-events: none; /* 마우스 클릭이 통과되도록 필수 설정 */
+  /* 중요: 여기에 animation이나 transform을 넣으면 JS 이동 코드와 충돌함 */
 }
 
-/* 스캐너가 회전하는 애니메이션 (선택 사항) */
+/* 실제 눈에 보이는 원과 회전은 가상 요소(::after)가 담당 */
 .mining-scanner::after {
   content: '';
-  position: absolute;
-  inset: -2px;
+  display: block;
+  width: 100%; height: 100%;
+  
+  /* 형광색 점선 및 배경 */
+  border: 2px dashed rgba(0, 243, 255, 0.6);
+  background: radial-gradient(circle, rgba(0, 243, 255, 0.1) 0%, transparent 70%);
   border-radius: 50%;
-  border-top: 2px solid rgba(0, 243, 255, 0.8);
-  border-right: 2px solid transparent;
-  animation: scan-rotate 2s linear infinite;
+  box-sizing: border-box;
+  
+  /* 회전 애니메이션은 여기서 수행 (부모의 이동에 영향 안 줌) */
+  animation: spin-scan 10s linear infinite;
 }
 
-@keyframes scan-rotate {
+@keyframes spin-scan {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
 /* [복구] 동적 광물 및 HP바 스타일 */
-.ore-instance-dynamic {
+/* [수정] 광물 컨테이너 (이동만 담당, 모양 없음) */
+.ore-container-dynamic {
   position: absolute;
-  /* transition 제거: 물리 엔진과 충돌 방지 */
-  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-  display: flex; justify-content: center; align-items: flex-end;
+  /* 중요: 여기에 clip-path를 넣으면 자식인 HP바도 잘려버림 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
   z-index: 10;
   will-change: transform;
+  /* cursor: crosshair; */
 }
-
+/* [추가] 실제 광물 비주얼 (여기에 모양과 색상 적용) */
+.ore-visual {
+  width: 100%;
+  height: 100%;
+  /* transition을 넣으면 물리엔진 반응이 느려지므로 제거하거나 짧게 */
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.5); /* 내부 그림자로 입체감 */
+}
+/* [수정] HP Bar 배경 */
 .ore-hp-bg {
-  width: 80%; height: 6px;
-  background: #333;
-  margin-bottom: -10px; /* 광물 아래에 위치 */
+  position: absolute;
+  bottom: -15px; /* 광물 본체 밑으로 내림 */
+  width: 50px; /* 고정 너비 혹은 % */
+  height: 6px;
+  background: #222;
+  border: 1px solid #444;
   border-radius: 3px;
   overflow: hidden;
-  pointer-events: none;
+  pointer-events: none; /* 클릭 방해 금지 */
+  z-index: 11;
 }
 
+/* HP Bar 채움 */
 .ore-hp-fill {
-  width: 100%; height: 100%;
+  width: 100%;
+  height: 100%;
   background: #00f3ff;
-  transition: width 0.1s;
+  transition: width 0.1s linear, background-color 0.2s;
 }
 
 /* [복구] 크리티컬 텍스트 이펙트 */
