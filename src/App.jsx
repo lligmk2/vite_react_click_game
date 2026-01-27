@@ -1,13 +1,9 @@
 import { useState, useEffect } from 'react';
 import GameStage from './components/GameStage';
 import SkillTree from './components/SkillTree';
-import ResultScreen from './components/ResultScreen';
 import { ORES, INITIAL_SKILLS } from './constants';
-// 사운드 매니저는 파일이 있다면 사용, 없다면 아래처럼 더미 함수 사용
- import { playSound, setBgm } from './utils/SoundManager';
-// 더미 구현 (에러 방지용)
-const playSound = (type) => { /* console.log('Sound:', type); */ };
-const setBgm = (isPlaying) => { /* console.log('BGM:', isPlaying); */ };
+// [수정됨] 실제 사운드 매니저 연결 (더미 코드 삭제함)
+import { playSound, setBgm } from './utils/SoundManager'; 
 
 import './App.css';
 
@@ -18,16 +14,14 @@ function App() {
   const [unlockedIndex, setUnlockedIndex] = useState(0); // 0 = 철광석만
   const [skills, setSkills] = useState(INITIAL_SKILLS);
 
-  // BGM 볼륨 조절용 (실제 구현 시 SoundManager에서 처리 권장)
-  useEffect(() => {
-    const audio = document.querySelector('audio'); // 만약 index.html에 audio 태그가 있다면
-    if(audio) audio.volume = 0.3; // 배경음 줄이기
-  }, []);
+  // SoundManager 내부에서 volume을 0.2로 설정하고 있으므로, 
+  // 별도의 DOM 조작 없이 SoundManager 설정을 따릅니다.
 
   const handleStartGame = () => {
+    // 사용자 인터랙션 시점에 사운드 컨텍스트 활성화 및 BGM 재생
     playSound('click');
+    setBgm(true); 
     setStatus('playing');
-    setBgm(true);
   };
 
   const handleOpenShop = () => {
@@ -36,7 +30,8 @@ function App() {
   };
 
   const handleTimeUp = (earnedGold) => {
-    setBgm(false);
+    setBgm(false); // 게임 종료 시 BGM 끄기
+    playSound('result');
     setLastEarned(earnedGold);
     setGold(prev => prev + earnedGold);
     setStatus('result');
@@ -88,12 +83,10 @@ function App() {
 
       {/* 4. 결과 화면 */}
       {status === 'result' && (
-        // ResultScreen 컴포넌트가 없다면 아래와 같이 인라인으로 대체 가능
-        // 만약 파일이 있다면 import해서 사용하세요.
         <div className="result-overlay">
-          <div className="result-box">
+          <div className="result-card">
             <h2 className="result-title">채굴 종료</h2>
-            <div className="result-amount">+{lastEarned.toLocaleString()}G</div>
+            <div className="result-score">+{lastEarned.toLocaleString()}G</div>
             <button className="btn-start" onClick={handleConfirmResult}>확인</button>
           </div>
         </div>
