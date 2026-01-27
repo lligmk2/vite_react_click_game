@@ -149,10 +149,20 @@ export default function GameStage({ skills, currentOreIndex, onTimeUp }) {
     }
 
     if (scannerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      const localX = pointerRef.current.x - rect.left;
-      const localY = pointerRef.current.y - rect.top;
-      scannerRef.current.style.transform = `translate(${localX}px, ${localY}px)`;
+      if (pointerRef.current.isDown) {
+        // 클릭/드래그 중일 때만 표시하고 위치 업데이트
+        scannerRef.current.style.opacity = "1";
+        
+        const rect = containerRef.current.getBoundingClientRect();
+        const localX = pointerRef.current.x - rect.left;
+        const localY = pointerRef.current.y - rect.top;
+        
+        // JS로 이동만 담당 (회전은 CSS ::after가 함)
+        scannerRef.current.style.transform = `translate(${localX}px, ${localY}px)`;
+      } else {
+        // 떼면 숨김
+        scannerRef.current.style.opacity = "0";
+      }
     }
 
     requestRef.current = requestAnimationFrame(gameLoop);
