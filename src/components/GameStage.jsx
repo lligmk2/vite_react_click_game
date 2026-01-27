@@ -158,7 +158,7 @@ const checkCollision = (globalX, globalY, isClick) => {
     const localX = globalX - rect.left;
     const localY = globalY - rect.top;
 
-    const radius = 15 + (skills.radius * 20);
+    const radius = 5 + (skills.radius * 20);
     let hitCount = 0;
     const deadIndices = [];
 
@@ -198,7 +198,7 @@ const checkCollision = (globalX, globalY, isClick) => {
         }
       });
       
-      const maxOres = 5 + (skills.regen * 2);
+      const maxOres = 15 + (skills.regen * 2);
       const needed = maxOres - oresRef.current.length;
       if (needed > 0) spawnOres(needed);
 

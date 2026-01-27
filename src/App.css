@@ -254,12 +254,27 @@
 
 /* 스캐너 */
 .mining-scanner {
-  position: absolute; top: 0; left: 0;
-  border: 1px dashed rgba(255, 255, 255, 0.6);
-  background: radial-gradient(circle, rgba(0, 243, 255, 0.15) 0%, transparent 70%);
+  position: absolute;
+  top: 0; left: 0;
+  /* 잘 보이게 형광색 점선과 은은한 배경 추가 */
+  border: 2px dashed rgba(0, 243, 255, 0.6); 
+  background: radial-gradient(circle, rgba(0, 243, 255, 0.1) 0%, transparent 70%);
   border-radius: 50%;
-  pointer-events: none; z-index: 5;
-  box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+  
+  /* 마우스 클릭을 가로채지 않도록 설정 (중요) */
+  pointer-events: none; 
+  
+  /* 광물(z-index: 10)보다 아래에, 배경보다는 위에 */
+  z-index: 5; 
+  
+  /* 부드러운 회전 애니메이션 (선택사항) */
+  animation: spin-scan 10s linear infinite;
+  display: block;
+}
+
+@keyframes spin-scan {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* [복구] 결과 화면 스타일 */
