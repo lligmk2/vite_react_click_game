@@ -3,8 +3,8 @@ import { ORES } from '../constants';
 import { playSound } from '../utils/SoundManager'; 
 
 export default function GameStage({ skills, currentOreIndex, onTimeUp }) {
-  // [수정됨] 기본 시간 15초 + 업그레이드당 5초 (지루함 방지)
-  const [timeLeft, setTimeLeft] = useState(15 + (skills.duration || 0) * 5);
+  // [수정] 기본 시간 15초 + 업그레이드당 5초 (요청사항 반영)
+  const [timeLeft, setTimeLeft] = useState(15 + ((skills.duration || 0) * 5));
   const [score, setScore] = useState(0);
   const [damageTexts, setDamageTexts] = useState([]); 
 
@@ -76,6 +76,7 @@ export default function GameStage({ skills, currentOreIndex, onTimeUp }) {
       div.style.width = '60px';
       div.style.height = '60px';
       
+      // HP바
       const hpBg = document.createElement('div');
       hpBg.className = 'ore-hp-bg';
       const hpFill = document.createElement('div');
@@ -129,9 +130,12 @@ export default function GameStage({ skills, currentOreIndex, onTimeUp }) {
       }
     });
 
-    // 드래그 오토 채굴 (스킬 필요)
+    // [핵심] 오토 드릴 로직
+    // skills.autoClick이 0이면 작동 안함 (1회성 구매 전)
+    // skills.autoClick이 1 이상이면 작동 (구매 후)
     if (pointerRef.current.isDown && skills.autoClick > 0) {
-      const cooldown = Math.max(50, 500 - (skills.autoClick * 45));
+      // 속도 공식: Lv1=600ms(느림) ~ Lv10=60ms(빠름)
+      const cooldown = Math.max(60, 600 - (skills.autoClick * 60));
       if (time - lastAutoMineTime.current > cooldown) {
         checkCollision(pointerRef.current.x, pointerRef.current.y, false); 
         lastAutoMineTime.current = time;
@@ -154,7 +158,8 @@ export default function GameStage({ skills, currentOreIndex, onTimeUp }) {
     const localX = globalX - rect.left;
     const localY = globalY - rect.top;
 
-    const radius = 10 + (skills.radius * 15);
+    // 범위: 기본은 매우 좁게(5px), 업그레이드 시 체감되게 증가
+    const radius = 5 + (skills.radius * 20);
     let hitCount = 0;
     const deadIndices = [];
 
@@ -163,12 +168,14 @@ export default function GameStage({ skills, currentOreIndex, onTimeUp }) {
       const cy = ore.y + 30;
       const dist = Math.sqrt((localX - cx)**2 + (localY - cy)**2);
       
+      // 판정
       if (dist < 30 * ore.scale + radius) {
         applyDamage(ore, idx, deadIndices);
         hitCount++;
       }
     });
 
+    // 멀티 록온 (미사일)
     if (hitCount > 0 && skills.missile > 0) {
       const targets = skills.missile; 
       let fired = 0;
@@ -185,6 +192,7 @@ export default function GameStage({ skills, currentOreIndex, onTimeUp }) {
       }
     }
 
+    // 처리
     if (deadIndices.length > 0) {
       deadIndices.sort((a,b) => b-a).forEach(idx => {
         if(idx !== -1) {
@@ -238,18 +246,21 @@ export default function GameStage({ skills, currentOreIndex, onTimeUp }) {
     if(isCrit) playSound('critical');
   };
 
+  // 입력 핸들러
   const handleDown = (e) => {
     pointerRef.current = { x: e.clientX, y: e.clientY, isDown: true };
+    // 다운 시엔 무조건 1회 타격 (스킬 여부 상관 없음 - 기본 기능)
     checkCollision(e.clientX, e.clientY, true);
   };
   
   const handleMove = (e) => {
     pointerRef.current = { x: e.clientX, y: e.clientY, isDown: pointerRef.current.isDown };
+    // Move 시엔 gameLoop 안에서 autoClick 레벨 체크 후 자동 채굴
   };
 
   const handleUp = () => pointerRef.current.isDown = false;
 
-  const scannerSize = (10 + skills.radius * 15) * 2;
+  const scannerSize = (5 + skills.radius * 20) * 2; // 범위 시각화도 수정
 
   return (
     <div 
