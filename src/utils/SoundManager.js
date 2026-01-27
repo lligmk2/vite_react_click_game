@@ -6,7 +6,7 @@ const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 // BGM은 외부 안정적인 스트리밍 주소 사용 (SoundHelix는 테스트용으로 개방됨)
 const bgm = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3');
 bgm.loop = true;
-bgm.volume = 0.8;
+bgm.volume = 0.5;
 
 export const playSound = (name) => {
   if (audioCtx.state === 'suspended') audioCtx.resume();
