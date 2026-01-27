@@ -197,25 +197,69 @@
   to { transform: rotate(360deg); }
 }
 
-/* [수정] 움직이는 광물 최적화 스타일 */
+/* [복구] 동적 광물 및 HP바 스타일 */
 .ore-instance-dynamic {
-  /* position, size는 인라인으로 들어감 */
-  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-  /* 중요: transition을 없애야 물리엔진이 즉각 반응함 */
-  transition: filter 0.1s; 
-  cursor: crosshair;
+  position: absolute;
+  /* transition 제거: 물리 엔진과 충돌 방지 */
+  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+  display: flex; justify-content: center; align-items: flex-end;
+  z-index: 10;
+  will-change: transform;
 }
 
-/* 범위 스캐너 */
-.mining-scanner {
-  position: absolute;
-  top: 0; left: 0;
-  border: 2px dashed rgba(255, 255, 255, 0.5);
-  background: radial-gradient(circle, rgba(0, 243, 255, 0.2) 0%, transparent 70%);
-  border-radius: 50%;
+.ore-hp-bg {
+  width: 80%; height: 6px;
+  background: #333;
+  margin-bottom: -10px; /* 광물 아래에 위치 */
+  border-radius: 3px;
+  overflow: hidden;
   pointer-events: none;
-  z-index: 5;
-  display: block; /* 항상 표시 */
+}
+
+.ore-hp-fill {
+  width: 100%; height: 100%;
+  background: #00f3ff;
+  transition: width 0.1s;
+}
+
+/* [복구] 크리티컬 텍스트 이펙트 */
+.damage-text {
+  position: absolute; pointer-events: none;
+  font-weight: bold; font-size: 1.2rem; color: #fff;
+  animation: floatUp 0.8s forwards; 
+  text-shadow: 1px 1px 2px #000;
+  z-index: 50;
+  white-space: nowrap;
+}
+
+.damage-text.crit {
+  color: #ff3e3e; 
+  font-size: 1.8rem; 
+  font-style: italic;
+  text-shadow: 0 0 10px #ff0000, 2px 2px 0px #000;
+  animation: critPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  z-index: 60;
+}
+
+@keyframes critPop {
+  0% { transform: scale(0.5) translateY(0); opacity: 0; }
+  50% { transform: scale(1.5) translateY(-20px); opacity: 1; }
+  100% { transform: scale(1.0) translateY(-50px); opacity: 0; }
+}
+
+@keyframes floatUp {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(-30px); opacity: 0; }
+}
+
+/* 스캐너 */
+.mining-scanner {
+  position: absolute; top: 0; left: 0;
+  border: 1px dashed rgba(255, 255, 255, 0.6);
+  background: radial-gradient(circle, rgba(0, 243, 255, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none; z-index: 5;
+  box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
 }
 
 /* [복구] 결과 화면 스타일 */

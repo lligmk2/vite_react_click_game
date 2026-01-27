@@ -4,7 +4,7 @@ import SkillTree from './components/SkillTree';
 import ResultScreen from './components/ResultScreen';
 import { ORES, INITIAL_SKILLS } from './constants';
 // 사운드 매니저는 파일이 있다면 사용, 없다면 아래처럼 더미 함수 사용
-// import { playSound, setBgm } from './utils/SoundManager';
+ import { playSound, setBgm } from './utils/SoundManager';
 // 더미 구현 (에러 방지용)
 const playSound = (type) => { /* console.log('Sound:', type); */ };
 const setBgm = (isPlaying) => { /* console.log('BGM:', isPlaying); */ };
