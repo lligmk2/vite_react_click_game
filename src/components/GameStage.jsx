@@ -19,7 +19,7 @@ export default function GameStage({ skills, currentOreIndex, onTimeUp }) {
   // 초기화
   useEffect(() => {
     // 초기 스폰 (기본 5개 + 리젠스킬*2)
-    const initialCount = 5 + (skills.regen * 2);
+    const initialCount = 15 + (skills.regen * 2);
     spawnOres(initialCount);
 
     requestRef.current = requestAnimationFrame(gameLoop);

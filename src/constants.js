@@ -23,13 +23,13 @@ export const ORES = [
 ];
 
 export const SKILL_INFO = {
-  power: { name: "드릴 파워", maxLevel: 50, baseCost: 50, desc: "클릭 당 데미지가 증가합니다." },
+  power: { name: "드릴 파워", maxLevel: 50, baseCost: 30, desc: "클릭 당 데미지가 증가합니다." },
   // [수정] 오토 드릴: 0->1 레벨업이 '해금' 역할
-  autoClick: { name: "오토 드릴 (해금)", maxLevel: 10, baseCost: 200, desc: "[필수] Lv.1 달성 시 드래그 채굴이 가능해집니다. 이후 속도가 빨라집니다." },
-  radius: { name: "채굴 범위", maxLevel: 10, baseCost: 500, desc: "한 번에 채굴할 수 있는 범위가 넓어집니다." },
-  regen: { name: "탐지 센서", maxLevel: 10, baseCost: 800, desc: "화면에 동시에 등장하는 광물의 개수가 늘어납니다." },
-  missile: { name: "멀티 록온", maxLevel: 5, baseCost: 2000, desc: "채굴 시 화면 내 다른 광물들도 동시에 타격합니다." },
-  critical: { name: "정밀 타격", maxLevel: 10, baseCost: 300, desc: "크리티컬 확률(최대 50%)과 배율이 증가합니다." },
+  autoClick: { name: "오토 드릴 (해금)", maxLevel: 10, baseCost: 100, desc: "[필수] Lv.1 달성 시 드래그 채굴이 가능해집니다. 이후 속도가 빨라집니다." },
+  radius: { name: "채굴 범위", maxLevel: 10, baseCost: 300, desc: "한 번에 채굴할 수 있는 범위가 넓어집니다." },
+  regen: { name: "탐지 센서", maxLevel: 10, baseCost: 500, desc: "화면에 동시에 등장하는 광물의 개수가 늘어납니다." },
+  missile: { name: "멀티 록온", maxLevel: 5, baseCost: 1000, desc: "채굴 시 화면 내 다른 광물들도 동시에 타격합니다." },
+  critical: { name: "정밀 타격", maxLevel: 10, baseCost: 500, desc: "크리티컬 확률(최대 50%)과 배율이 증가합니다." },
   duration: { name: "시간 연장", maxLevel: 5, baseCost: 1000, desc: "제한 시간이 5초씩 늘어납니다." } // 시간 연장 스킬도 유지
 };
 
