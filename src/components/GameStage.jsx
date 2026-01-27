@@ -152,7 +152,7 @@ export default function GameStage({ skills, currentOreIndex, onTimeUp }) {
     requestRef.current = requestAnimationFrame(gameLoop);
   };
 
-  const checkCollision = (globalX, globalY, isClick) => {
+const checkCollision = (globalX, globalY, isClick) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     const localX = globalX - rect.left;
