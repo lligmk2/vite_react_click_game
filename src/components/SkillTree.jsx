@@ -1,82 +1,86 @@
-import React from 'react';
+import { SKILL_INFO } from '../constants';
 
-export default function SkillTree({ gold, setGold, skills, setSkills, nextOre, onUnlockSuccess, onClose }) {
-  const upgradeSkill = (key, cost) => {
-    if (gold >= cost) {
-      setGold(prev => prev - cost);
-      setSkills(prev => ({ ...prev, [key]: prev[key] + 1 }));
-    } else {
-      alert("자금이 부족합니다!");
-    }
+export default function SkillTree({ gold, setGold, skills, setSkills, nextOre, onUnlockSuccess, onClose, onStartNow }) {
+  
+  const handleUpgrade = (key) => {
+    const info = SKILL_INFO[key];
+    const currentLv = skills[key];
+    
+    // 비용 계산 공식: 기본비용 * (1.5 ^ 레벨)
+    const cost = Math.floor(info.baseCost * Math.pow(1.5, currentLv));
+
+    if (currentLv >= info.maxLevel) return; // 만렙
+    if (gold < cost) return; // 돈 부족
+
+    setGold(prev => prev - cost);
+    setSkills(prev => ({ ...prev, [key]: prev[key] + 1 }));
   };
 
+  const getCost = (key) => {
+    const info = SKILL_INFO[key];
+    return Math.floor(info.baseCost * Math.pow(1.5, skills[key]));
+  };
+
+  // 광물 해금 (확률이 아닌 확정 해금 -> 게임 내 등장 확률은 spawn 로직에서 처리)
+  const canUnlockOre = nextOre && gold >= nextOre.unlockCost;
+
   return (
-    <div className="overlay-screen shop-overlay">
-      <div className="shop-card shadow-animation">
-        <button className="close-x" onClick={onClose}>X</button>
-        <h2 className="shop-title">🔬 테크놀로지 연구소</h2>
-        <div className="current-funds">보유 자금: <span>{gold.toLocaleString()}G</span></div>
+    <div className="shop-overlay">
+      <div className="shop-header">
+        <h2>🛠️ 기술 연구소</h2>
+        <span className="shop-gold">보유 자산: {gold.toLocaleString()}G</span>
+      </div>
 
-        <div className="skill-list">
-          {/* 드릴 강화 */}
-          <div className="skill-card">
-            <div className="skill-info">
-              <span className="skill-name">드릴 출력 강화 (Lv.{skills.power})</span>
-              <span className="skill-desc">클릭 당 파워가 상승합니다.</span>
-            </div>
-            <button 
-              className={`buy-btn ${gold < (skills.power * 1000) ? 'disabled' : ''}`}
-              onClick={() => upgradeSkill('power', skills.power * 1000)}
-            >
-              {(skills.power * 1000).toLocaleString()}G
-            </button>
-          </div>
+      <div className="skill-list">
+        {Object.keys(SKILL_INFO).map(key => {
+          const info = SKILL_INFO[key];
+          const level = skills[key];
+          const cost = getCost(key);
+          const isMax = level >= info.maxLevel;
 
-          {/* 배터리 확장 */}
-          <div className="skill-card">
-            <div className="skill-info">
-              <span className="skill-name">배터리 용량 확장 (Lv.{skills.duration})</span>
-              <span className="skill-desc">채굴 제한 시간이 2초 증가합니다.</span>
-            </div>
-            <button 
-              className={`buy-btn ${gold < (skills.duration + 1) * 500 ? 'disabled' : ''}`}
-              onClick={() => upgradeSkill('duration', (skills.duration + 1) * 500)}
-            >
-              {((skills.duration + 1) * 500).toLocaleString()}G
-            </button>
-          </div>
-            {/* 미사일 확률 강화 */}
-            <div className="skill-card">
-            <div className="skill-info">
-                <span className="skill-name">미사일 시스템 (Lv.{skills.missile || 0})</span>
-                <span className="skill-desc">{skills.missile * 5}% 확률로 10배 데미지 발사!</span>
-            </div>
-            <button 
-                className={`buy-btn ${gold < (skills.missile + 1) * 1000 ? 'disabled' : ''}`}
-                onClick={() => upgradeSkill('missile', (skills.missile + 1) * 1000)}
-            >
-                {((skills.missile + 1) * 1000).toLocaleString()}G
-            </button>
-            </div>
-          {/* 광물 해금 (다음 단계가 있을 때만 표시) */}
-          {nextOre && (
-            <div className="unlock-card">
-              <h3>🚀 차세대 탐사 구역</h3>
-              <p>{nextOre.name} 매장지 발견</p>
+          return (
+            <div key={key} className="skill-item">
+              <div className="skill-info">
+                <h4>{info.name}</h4>
+                <p>{info.desc}</p>
+                <div className="skill-level">Lv. {level} / {info.maxLevel}</div>
+              </div>
               <button 
-                className={`unlock-main-btn ${gold < nextOre.unlockCost ? 'disabled' : ''}`}
-                onClick={() => {
-                  if (gold >= nextOre.unlockCost) {
-                    setGold(prev => prev - nextOre.unlockCost);
-                    onUnlockSuccess();
-                  }
-                }}
+                className={`btn-buy ${isMax ? 'maxed' : ''}`}
+                disabled={isMax || gold < cost}
+                onClick={() => handleUpgrade(key)}
               >
-                {nextOre.unlockCost.toLocaleString()}G 지불하고 해금
+                {isMax ? "MAX" : `${cost.toLocaleString()}G`}
               </button>
             </div>
-          )}
-        </div>
+          );
+        })}
+
+        {/* 광물 해금 카드 */}
+        {nextOre && (
+          <div className="skill-item" style={{ borderColor: '#ffd700', background: '#222' }}>
+            <div className="skill-info">
+              <h4 style={{ color: nextOre.color }}>신규 광물: {nextOre.name} 발견</h4>
+              <p>더 비싼 광물이 등장할 확률이 생깁니다.</p>
+            </div>
+            <button 
+              className="btn-buy"
+              style={{ background: '#ffd700', color: '#000', borderColor: '#ffd700' }}
+              disabled={!canUnlockOre}
+              onClick={() => {
+                setGold(prev => prev - nextOre.unlockCost);
+                onUnlockSuccess();
+              }}
+            >
+              해금 {nextOre.unlockCost.toLocaleString()}G
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="shop-footer">
+        <button className="btn-close" onClick={onClose}>로비로 나가기</button>
+        <button className="btn-play-now" onClick={onStartNow}>바로 채굴 시작</button>
       </div>
     </div>
   );
