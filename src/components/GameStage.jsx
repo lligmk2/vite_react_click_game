@@ -178,6 +178,7 @@ export default function GameStage({ skills, currentOreIndex, onTimeUp }) {
     let hitCount = 0;
     const deadIndices = [];
 
+    // 1. 범위 공격 (메인 타격)
     oresRef.current.forEach((ore, idx) => {
       const cx = ore.x + 30;
       const cy = ore.y + 30;
@@ -189,31 +190,44 @@ export default function GameStage({ skills, currentOreIndex, onTimeUp }) {
       }
     });
 
+    // 2. [버그 수정] 멀티 록온 (미사일)
     if (hitCount > 0 && skills.missile > 0) {
       const targets = skills.missile; 
       let fired = 0;
-      const aliveOres = oresRef.current.filter((_, i) => !deadIndices.includes(i));
+
+      // [수정] 단순히 필터링만 하지 않고, '원래 인덱스'를 기억하는 객체 배열을 만듭니다.
+      // 이미 메인 타격으로 죽을 예정인 애들(deadIndices)은 제외합니다.
+      const candidates = oresRef.current
+        .map((ore, idx) => ({ ore, idx })) 
+        .filter(item => !deadIndices.includes(item.idx) && item.ore.currentHp > 0);
       
-      while(fired < targets && aliveOres.length > 0) {
-        const rndIdx = Math.floor(Math.random() * aliveOres.length);
-        const target = aliveOres[rndIdx];
-        if(target.currentHp > 0) {
-           applyDamage(target, -1, deadIndices);
-           fired++;
-           aliveOres.splice(rndIdx, 1);
-        }
+      while(fired < targets && candidates.length > 0) {
+        const rnd = Math.floor(Math.random() * candidates.length);
+        const { ore, idx } = candidates[rnd]; // 광물과 '진짜 인덱스' 추출
+
+        // [핵심 수정] -1 대신 '진짜 인덱스(idx)'를 넘겨야 죽었을 때 deadIndices에 추가됨
+        applyDamage(ore, idx, deadIndices);
+        
+        fired++;
+        candidates.splice(rnd, 1); // 중복 타격 방지
       }
     }
 
+    // 3. 죽은 광물 처리 (일괄 삭제)
     if (deadIndices.length > 0) {
-      deadIndices.sort((a,b) => b-a).forEach(idx => {
-        if(idx !== -1) {
+      // 인덱스가 꼬이지 않게 내림차순 정렬 후 삭제
+      // 중복 인덱스 제거 (미사일과 범위공격이 동시에 죽였을 경우 대비)
+      const uniqueDeadIndices = [...new Set(deadIndices)].sort((a,b) => b-a);
+      
+      uniqueDeadIndices.forEach(idx => {
+        if(idx !== -1 && oresRef.current[idx]) {
             const ore = oresRef.current[idx];
-            if(ore && ore.element) ore.element.remove(); 
-            oresRef.current.splice(idx, 1);
+            if(ore.element) ore.element.remove(); // DOM 제거
+            oresRef.current.splice(idx, 1); // 배열에서 제거
         }
       });
       
+      // 리젠 로직 (최대 개수 15 유지)
       const maxOres = 15 + (skills.regen * 2); 
       const needed = maxOres - oresRef.current.length;
       if (needed > 0) spawnOres(needed);
@@ -221,6 +235,7 @@ export default function GameStage({ skills, currentOreIndex, onTimeUp }) {
       playSound('break');
     }
     
+    // 타격음 재생
     if (hitCount > 0) {
         playSound('mine'); 
     }
