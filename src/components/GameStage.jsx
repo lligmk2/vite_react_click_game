@@ -207,7 +207,7 @@ export default function GameStage({ skills, currentOreIndex, onTimeUp }) {
     
     // [중요 수정] 드래그든 클릭이든 맞추면 무조건 'mine' 사운드 재생
     if (hitCount > 0) {
-        playSound('mine'); 
+        playSound('click'); 
     }
   };
 
