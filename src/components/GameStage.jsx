@@ -260,7 +260,7 @@ export default function GameStage({ skills, currentOreIndex, onTimeUp }) {
 
   const handleUp = () => pointerRef.current.isDown = false;
 
-  const scannerSize = (5 + skills.radius * 20) * 2; // 범위 시각화도 수정
+  const scannerSize = (15 + skills.radius * 20) * 2; // 범위 시각화도 수정
 
   return (
     <div 
