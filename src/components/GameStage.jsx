@@ -158,7 +158,7 @@ const checkCollision = (globalX, globalY, isClick) => {
     const localX = globalX - rect.left;
     const localY = globalY - rect.top;
 
-    const radius = 5 + (skills.radius * 20);
+    const radius = 15 + (skills.radius * 20);
     let hitCount = 0;
     const deadIndices = [];
 
