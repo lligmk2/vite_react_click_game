@@ -196,3 +196,51 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+/* [수정] 움직이는 광물 최적화 스타일 */
+.ore-instance-dynamic {
+  /* position, size는 인라인으로 들어감 */
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  /* 중요: transition을 없애야 물리엔진이 즉각 반응함 */
+  transition: filter 0.1s; 
+  cursor: crosshair;
+}
+
+/* 범위 스캐너 */
+.mining-scanner {
+  position: absolute;
+  top: 0; left: 0;
+  border: 2px dashed rgba(255, 255, 255, 0.5);
+  background: radial-gradient(circle, rgba(0, 243, 255, 0.2) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 5;
+  display: block; /* 항상 표시 */
+}
+
+/* [복구] 결과 화면 스타일 */
+.result-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(5px);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 1000;
+}
+
+.result-card {
+  background: #1e1e1e;
+  border: 2px solid #ffd700;
+  padding: 40px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 0 50px rgba(255, 215, 0, 0.3);
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.result-title { font-size: 2rem; color: #fff; margin-bottom: 20px; }
+.result-score { font-size: 3.5rem; color: #ffd700; font-weight: 900; margin-bottom: 30px; display: block;}
+
+@keyframes popIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
