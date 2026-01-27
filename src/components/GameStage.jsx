@@ -158,7 +158,6 @@ export default function GameStage({ skills, currentOreIndex, onTimeUp }) {
     const localX = globalX - rect.left;
     const localY = globalY - rect.top;
 
-    // 범위: 기본은 매우 좁게(5px), 업그레이드 시 체감되게 증가
     const radius = 5 + (skills.radius * 20);
     let hitCount = 0;
     const deadIndices = [];
@@ -168,14 +167,12 @@ export default function GameStage({ skills, currentOreIndex, onTimeUp }) {
       const cy = ore.y + 30;
       const dist = Math.sqrt((localX - cx)**2 + (localY - cy)**2);
       
-      // 판정
       if (dist < 30 * ore.scale + radius) {
         applyDamage(ore, idx, deadIndices);
         hitCount++;
       }
     });
 
-    // 멀티 록온 (미사일)
     if (hitCount > 0 && skills.missile > 0) {
       const targets = skills.missile; 
       let fired = 0;
@@ -192,7 +189,6 @@ export default function GameStage({ skills, currentOreIndex, onTimeUp }) {
       }
     }
 
-    // 처리
     if (deadIndices.length > 0) {
       deadIndices.sort((a,b) => b-a).forEach(idx => {
         if(idx !== -1) {
@@ -202,14 +198,17 @@ export default function GameStage({ skills, currentOreIndex, onTimeUp }) {
         }
       });
       
-      const maxOres = 15 + (skills.regen * 2);
+      const maxOres = 5 + (skills.regen * 2);
       const needed = maxOres - oresRef.current.length;
       if (needed > 0) spawnOres(needed);
 
-      playSound('click');
+      playSound('break');
     }
     
-    if (hitCount > 0) playSound(isClick ? 'mine' : 'click');
+    // [중요 수정] 드래그든 클릭이든 맞추면 무조건 'mine' 사운드 재생
+    if (hitCount > 0) {
+        playSound('mine'); 
+    }
   };
 
   const applyDamage = (ore, idx, deadIndices) => {
