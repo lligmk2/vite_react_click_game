@@ -166,3 +166,33 @@
     box-shadow: 0 0 10px #ff0000;
     pointer-events: none; z-index: 90;
   }
+
+  /* [추가/변경] 채굴 범위 스캐너 (마우스 따라다니는 원) */
+.mining-scanner {
+  position: absolute;
+  top: 0; left: 0;
+  border: 1px dashed rgba(0, 243, 255, 0.4); /* 은은한 점선 테두리 */
+  background: radial-gradient(circle, rgba(0, 243, 255, 0.1) 0%, transparent 70%); /* 내부는 투명하게 */
+  border-radius: 50%;
+  pointer-events: none; /* 클릭 통과 (게임 방해 X) */
+  z-index: 5; /* 광물(z-index: 10)보다 아래에 그려져서 광물을 가리지 않음 */
+  will-change: transform; /* 성능 최적화 */
+  box-shadow: 0 0 10px rgba(0, 243, 255, 0.1); /* 약한 발광 효과 */
+  display: none; /* 기본 숨김, JS로 제어 */
+}
+
+/* 스캐너가 회전하는 애니메이션 (선택 사항) */
+.mining-scanner::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border-top: 2px solid rgba(0, 243, 255, 0.8);
+  border-right: 2px solid transparent;
+  animation: scan-rotate 2s linear infinite;
+}
+
+@keyframes scan-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
