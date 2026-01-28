@@ -55,18 +55,19 @@ export const playSound = (name) => {
       osc.stop(now + 0.06); // 여유 시간
       break;
 
-    case 'break': // 파괴음 (노이즈 느낌 대신 낮은 주파수 쿵)
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(100, now);
-      osc.frequency.exponentialRampToValueAtTime(10, now + 0.2);
+      case 'break': // 옵션 1: 고전 8비트 파괴음
+      osc.type = 'square';
+      
+      // 높은 곳에서 낮은 곳으로 빠르게 떨어짐 (삐-융X -> 퍽O)
+      osc.frequency.setValueAtTime(150, now); 
+      osc.frequency.exponentialRampToValueAtTime(40, now + 0.08);
 
-      gain.gain.setValueAtTime(0.3, now);
-      gain.gain.linearRampToValueAtTime(0.001, now + 0.2);
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
 
       osc.start(now);
-      osc.stop(now + 0.21);
+      osc.stop(now + 0.11);
       break;
-
     case 'upgrade': // 뾰로롱
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(200, now);
