@@ -74,6 +74,19 @@
     cursor: pointer;
   }
   
+  .stop-btn {
+    background: #ff4e4e;
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: bold;
+    
+    /* 중요: 부모(HUD)가 터치를 막아도 버튼은 터치 가능하게 설정 */
+    pointer-events: auto; 
+    cursor: pointer; /* 마우스용 커서도 추가 */
+  }
+  
   /* 광물이 맞았을 때 애니메이션 */
   .ore-hit { animation: shake 0.2s; filter: brightness(1.5); }
   @keyframes shake {
@@ -121,8 +134,19 @@
   }
   .shop-gold { color: #ffd700; font-size: 1.2rem; font-weight: bold; }
   
-  .skill-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-  
+  .skill-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    
+    /* 중요: 이 속성이 있어야 폰에서 드래그 스크롤이 됩니다 */
+    touch-action: pan-y; 
+    /* 스크롤바가 너무 투박하지 않게 (선택사항) */
+    -webkit-overflow-scrolling: touch;
+  }
+
   .skill-item {
     display: flex; justify-content: space-between; align-items: center;
     background: #1a1a1a; padding: 15px; border-radius: 10px;
