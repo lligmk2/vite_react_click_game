@@ -3,7 +3,6 @@
    ========================================= */
    * {
     box-sizing: border-box;
-    touch-action: none; /* 드래그 시 스크롤 방지 */
     user-select: none;
     -webkit-tap-highlight-color: transparent;
     margin: 0; padding: 0;
@@ -86,7 +85,7 @@
     pointer-events: auto; 
     cursor: pointer; /* 마우스용 커서도 추가 */
   }
-  
+
   /* 광물이 맞았을 때 애니메이션 */
   .ore-hit { animation: shake 0.2s; filter: brightness(1.5); }
   @keyframes shake {
@@ -136,14 +135,17 @@
   
   .skill-list {
     flex: 1;
+  
+    /* 👇 [필수] 이 한 줄이 없으면 모바일/PC 모두 플렉스 박스 안에서 스크롤이 고장 납니다 */
+    min-height: 0; 
+    
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 10px;
     
-    /* 중요: 이 속성이 있어야 폰에서 드래그 스크롤이 됩니다 */
+    /* 모바일 터치감 향상 */
     touch-action: pan-y; 
-    /* 스크롤바가 너무 투박하지 않게 (선택사항) */
     -webkit-overflow-scrolling: touch;
   }
 
